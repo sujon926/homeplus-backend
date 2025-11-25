@@ -34,6 +34,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+from datetime import timedelta
 
 # Application definition
 
@@ -100,15 +101,16 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'accounts.User'
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+}
 
 
 # Password validation
