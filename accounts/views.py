@@ -1,5 +1,4 @@
 from urllib.parse import urlencode, unquote
-from .serializers import UserSerializer
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -14,9 +13,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from .serializers import SignupSerializer, LoginSerializer
-
-
-
 
 
 class SignupView(generics.CreateAPIView):
@@ -77,3 +73,4 @@ class LoginView(generics.GenericAPIView):
                 "role": user.role,
             }
         }, status=status.HTTP_200_OK)
+
