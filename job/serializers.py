@@ -24,62 +24,27 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
 
 
 class QuoteBidSerializer(serializers.ModelSerializer):
-    quote_id = serializers.IntegerField(write_only=True)  # send only ID
-    trader_id = serializers.IntegerField(write_only=True)  # send only ID
+    worker = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = QuoteBid
-        fields = [
-            "id",
-            "quote_id",
-            "trader_id",
-            "proposed_value",
-            "availability_date",
-            "note",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["created_at", "updated_at"]
-
-    def validate(self, attrs):
-        # Validate quote exists
-        try:
-            quote = QuoteRequest.objects.get(id=attrs["quote_id"])
-        except QuoteRequest.DoesNotExist:
-            raise serializers.ValidationError({"quote_id": "Quote not found."})
-
-        # Validate availability date (not past)
-        availability_date = attrs.get("availability_date")
-        if availability_date and availability_date < timezone.now().date():
-            raise serializers.ValidationError(
-                {"availability_date": "Availability date cannot be in the past."}
-            )
-
-        # Validate proposed value
-        if attrs.get("proposed_value") is not None:
-            if attrs["proposed_value"] <= 0:
-                raise serializers.ValidationError(
-                    {"proposed_value": "Proposed value must be greater than 0."}
-                )
-
-        return attrs
-
-    def create(self, validated_data):
-        quote_id = validated_data.pop("quote_id")
-        trader_id = validated_data.pop("trader_id")
-
-        quote = QuoteRequest.objects.get(id=quote_id)
-        trader = User.objects.get(id=trader_id)
-
-        return QuoteBid.objects.create(quote=quote, trader=trader, **validated_data)
-
-
-class QuoteBidUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuoteBid
-        fields = ["proposed_value", "availability_date", "note"]
+        fields = ['id', 'quote', 'worker', 'proposed_value', 'availability_date', 'note', 'status', 'created_at']
+        read_only_fields = ['worker', 'status', 'created_at']
 
     def validate_availability_date(self, value):
-        if value and value < timezone.now().date():
-            raise serializers.ValidationError("Availability date cannot be in the past.")
+        if value < timezone.now():
+            raise serializers.ValidationError("Availability date must be in the future.")
+        return value
+
+
+
+
+class QuoteBidStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuoteBid
+        fields = ['status']
+
+    def validate_status(self, value):
+        if value not in ["ACCEPTED", "REJECTED"]:
+            raise serializers.ValidationError("Status must be ACCEPTED or REJECTED.")
         return value

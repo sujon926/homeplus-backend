@@ -12,3 +12,14 @@ class PriorityChoices(models.TextChoices):
     LOW = 'Low', 'Low'
     MEDIUM = 'Medium', 'Medium'
     HIGH = 'High', 'High'
+
+
+
+from django.db import models
+
+class BidStatusChoices(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    ACCEPTED = "ACCEPTED", "Accepted"
+    REJECTED = "REJECTED", "Rejected"
+
+

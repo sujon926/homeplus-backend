@@ -5,7 +5,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .models import QuoteRequest
-from .serializers import QuoteRequestSerializer,QuoteBidUpdateSerializer,QuoteBidSerializer
+from .serializers import QuoteRequestSerializer,QuoteBidSerializer,QuoteBidStatusUpdateSerializer
+
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import QuoteBid
 
@@ -37,46 +38,39 @@ class QuoteRequestListView(generics.ListAPIView):
 
 
 
-class CreateQuoteBidView(generics.CreateAPIView):
+# Worker/Trader: Bid on a job
+class QuoteBidCreateView(generics.CreateAPIView):
     serializer_class = QuoteBidSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data["trader_id"] = request.user.id  # Force logged in user
-        
-        serializer = self.get_serializer(data=data)
+    def post(self, request, quote_id, *args, **kwargs):
+        try:
+            quote = QuoteRequest.objects.get(id=quote_id)
+        except QuoteRequest.DoesNotExist:
+            return Response({"detail": "Quote not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        bid = serializer.save()
+        serializer.save(worker=request.user, quote=quote)
+        return Response({"message": "Bid submitted successfully", "bid": serializer.data}, status=status.HTTP_201_CREATED)
 
-        return Response(
-            {"message": "Bid submitted successfully", "bid": serializer.data},
-            status=status.HTTP_201_CREATED,
-        )
 
-class QuoteBidListForQuoteView(generics.ListAPIView):
+
+class QuoteBidApproveRejectView(generics.UpdateAPIView):
+    queryset = QuoteBid.objects.all()
+    serializer_class = QuoteBidStatusUpdateSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = 'id'
+
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+
+
+class WorkerBidListView(generics.ListAPIView):
     serializer_class = QuoteBidSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        quote_id = self.kwargs["quote_id"]
-        return QuoteBid.objects.filter(quote_id=quote_id)
-
-
-class UpdateQuoteBidView(generics.UpdateAPIView):
-    queryset = QuoteBid.objects.all()
-    serializer_class = QuoteBidUpdateSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = "id"
-
-    def update(self, request, *args, **kwargs):
-        bid = self.get_object()
-
-        # Ensuring only the worker who created it can update
-        if bid.trader != request.user:
-            return Response(
-                {"error": "You are not allowed to submit this bid."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        return super().update(request, *args, **kwargs)
+        return QuoteBid.objects.filter(worker=self.request.user)
 
