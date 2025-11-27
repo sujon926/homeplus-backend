@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'common',
     'accounts', 
     'job',
-    'settings',
+    'settings.apps.SettingsConfig',
 ]
 
 MIDDLEWARE = [
