@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'common',
     'accounts', 
     'job',
+    'settings',
 ]
 
 MIDDLEWARE = [
