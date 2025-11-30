@@ -5,16 +5,19 @@ from .serializers import AdminProfileSerializer,ChangePasswordSerializer
 from django.contrib.auth import update_session_auth_hash
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class AdminProfileView(RetrieveUpdateAPIView):
     serializer_class = AdminProfileSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_object(self):
-        # Return logged-in user's admin profile
         return self.request.user.admin_profile
+
 
 
 # ---------------------- Change Password ---------------------- #

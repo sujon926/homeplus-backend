@@ -39,7 +39,8 @@ class SignupView(generics.CreateAPIView):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "name": user.name,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "role": user.role,
             }
         }, status=status.HTTP_201_CREATED)
@@ -49,7 +50,8 @@ class SignupView(generics.CreateAPIView):
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     refresh['role'] = user.role
-    refresh['name'] = user.name 
+    refresh['first_name'] = user.first_name
+    refresh['last_name'] = user.last_name
     refresh['email'] = user.email 
      # optional
     return {
@@ -78,7 +80,8 @@ class LoginView(generics.GenericAPIView):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "name": user.name,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "role": user.role,
             }
         }, status=status.HTTP_200_OK)

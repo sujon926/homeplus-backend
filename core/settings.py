@@ -15,17 +15,14 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from decouple import config
+import dj_database_url
 
 load_dotenv()
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-&gsa+v&jjr4t(sp+@&*i6xm_+z971mx04&@i*62a)byx)j-)#9'
 
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -35,7 +32,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
-from datetime import timedelta
+
+
+
+# CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080,http://10.10.13.2:8080,').split(',')
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://127.0.0.1:8080,http://localhost:8080,http://10.10.13.2:8080'
+).split(',')
+
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -59,15 +65,22 @@ INSTALLED_APPS = [
     'documents',
 ]           
 
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = 'core.urls'
 
@@ -91,6 +104,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv("RENDER_DB"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
 DATABASES = {
     'default': {

@@ -6,27 +6,45 @@ from django.utils.translation import gettext as _
 class AdminProfileSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     email = serializers.EmailField(source="user.email", read_only=True)
+    profile_image = serializers.ImageField(required=False)  # <-- allow upload
 
     class Meta:
         model = AdminProfile
-        fields = ["name", "email", "phone"]
+        fields = ["name", "email", "profile_image", "phone"]
 
     def update(self, instance, validated_data):
-        # Update Name (writes to user model)
+        # Update name (user model)
         name = validated_data.pop("name", None)
         if name:
-            instance.user.name = name
+            instance.user.first_name = name.split(" ")[0]
+            if len(name.split(" ")) > 1:
+                instance.user.last_name = " ".join(name.split(" ")[1:])
             instance.user.save()
 
         # Update phone
         instance.phone = validated_data.get("phone", instance.phone)
-        instance.save()
 
+        # Update profile image (Cloudinary)
+        image = validated_data.get("profile_image", None)
+        if image:
+            instance.profile_image = image
+
+        instance.save()
         return instance
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["name"] = instance.user.name or ""
+
+        # Full name
+        first = instance.user.first_name or ""
+        last = instance.user.last_name or ""
+        data["name"] = (first + " " + last).strip()
+
+        # Always return URL string
+        data["profile_image"] = (
+            instance.profile_image.url if instance.profile_image else ""
+        )
+
         return data
 
 

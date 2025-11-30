@@ -27,22 +27,32 @@ class SignupSerializer(serializers.ModelSerializer):
         },
     )
 
-    name = serializers.CharField(
-        validators=[
-            RegexValidator(
-                regex=r"^[A-Za-z\s]+$",
-                message="Name can only contain letters and spaces.",
-            )
-        ],
+    first_name = serializers.CharField(
+        required=True,
         error_messages={
-            "blank": "Name field is required.",
-            "required": "Please provide your name.",
+            "blank": "First name is required.",
+            "required": "Please provide your first name.",
+        },
+    )
+
+    last_name = serializers.CharField(
+        required=True,
+        error_messages={
+            "blank": "Last name is required.",
+            "required": "Please provide your last name.",
         },
     )
 
     class Meta:
         model = User
-        fields = ["name", "email", "password", "confirm_password", "role"]
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "confirm_password",
+            "role",
+        ]
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -58,8 +68,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop("confirm_password")
-        user = User.objects.create_user(**validated_data)
-        return user
+        return User.objects.create_user(**validated_data)
 
 
 # ---------------------------

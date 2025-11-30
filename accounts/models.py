@@ -6,6 +6,11 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from .enums import PropertyTypeChoices
 
 
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from .enums import PropertyTypeChoices
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, role=None, **extra_fields):
         if not email:
@@ -36,9 +41,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
 
+    email = models.EmailField(unique=True)
 
     role = models.CharField(
         max_length=20,
@@ -50,26 +56,27 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)  
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='accounts_user_set', 
+        related_name='accounts_user_set',
         blank=True
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='accounts_user_permissions_set',  
+        related_name='accounts_user_permissions_set',
         blank=True
     )
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
-        return self.email
+        return f"{self.first_name} {self.last_name}"
+    
 
 # otp model to store OTPs for users
 class OTP(models.Model):
