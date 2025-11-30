@@ -25,18 +25,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECRET_KEY = 'django-insecure-&gsa+v&jjr4t(sp+@&*i6xm_+z971mx04&@i*62a)byx)j-)#9'
 
+
+DEBUG = os.getenv("DEBUG", "False") == "True"
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else ["*"]
 
 
 # CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080,http://10.10.13.2:8080,').split(',')
+# CORS_ALLOWED_ORIGINS = os.getenv(
+#     'CORS_ALLOWED_ORIGINS',
+#     'http://127.0.0.1:8080,http://localhost:8080,http://10.10.13.2:8080'
+# ).split(',')
+
 CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS',
-    'http://127.0.0.1:8080,http://localhost:8080,http://10.10.13.2:8080'
+    'CORS_ALLOWED_ORIGINS', 
+    'http://127.0.0.1:8080,http://localhost:8080'
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
