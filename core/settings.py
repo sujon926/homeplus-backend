@@ -19,33 +19,28 @@ import dj_database_url
 
 load_dotenv()
 from datetime import timedelta
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# SECRET_KEY = 'django-insecure-&gsa+v&jjr4t(sp+@&*i6xm_+z971mx04&@i*62a)byx)j-)#9'
+# Debug Mode
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-
-
-DEBUG = os.getenv("DEBUG", "False") == "True"
+# SECRET KEY
 SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("❌ SECRET_KEY missing in .env file")
 
+# Allowed Hosts
 if DEBUG:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:
     ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-
-
-
-# CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:8080,http://10.10.13.2:8080,').split(',')
-# CORS_ALLOWED_ORIGINS = os.getenv(
-#     'CORS_ALLOWED_ORIGINS',
-#     'http://127.0.0.1:8080,http://localhost:8080,http://10.10.13.2:8080'
-# ).split(',')
-
+# CORS
 CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 
+    'CORS_ALLOWED_ORIGINS',
     'http://127.0.0.1:8080,http://localhost:8080'
 ).split(',')
 
@@ -112,47 +107,52 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default=os.getenv("RENDER_DB"),
-#         conn_max_age=600,
-#         ssl_require=True,
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv("RENDER_DB"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('DB_USER'),
-#         'PASSWORD': os.getenv('DB_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST', 'localhost'),
-#         'PORT': os.getenv('DB_PORT', '5432'),
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+    }
+}
+
+
+
+
+# DEBUG = os.getenv("DEBUG", "False") == "True"
+
+# if DEBUG:
+#     # Local PostgreSQL
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql',
+#             'NAME': os.getenv('DB_NAME'),
+#             'USER': os.getenv('DB_USER'),
+#             'PASSWORD': os.getenv('DB_PASSWORD'),
+#             'HOST': os.getenv('DB_HOST', 'localhost'),
+#             'PORT': os.getenv('DB_PORT', '5432'),
+#         }
 #     }
-# }
+# else:
+#     # Render PostgreSQL
+#     DATABASES = {
+#         'default': dj_database_url.config(
+#             default=os.getenv("RENDER_DB"),
+#             conn_max_age=600,
+#             ssl_require=True
+#         )
+#     }
 
-
-if os.getenv("DEBUG", "True") == "True":
-    # Local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        }
-    }
-else:
-    # Production on Render
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv("RENDER_DB"),
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
 
 
 AUTH_USER_MODEL = 'accounts.User'
