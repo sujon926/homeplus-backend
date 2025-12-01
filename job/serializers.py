@@ -24,19 +24,23 @@ class QuoteRequestSerializer(serializers.ModelSerializer):
 
 
 class QuoteBidSerializer(serializers.ModelSerializer):
-    worker = serializers.StringRelatedField(read_only=True)
+    trader = serializers.StringRelatedField(source="worker", read_only=True)  # rename for clarity
+    quote = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = QuoteBid
-        fields = ['id', 'quote', 'worker', 'proposed_value', 'availability_date', 'note', 'status', 'created_at']
-        read_only_fields = ['worker', 'status', 'created_at']
+        fields = ['id', 'quote', 'trader', 'proposed_value', 'availability_date', 'note', 'status', 'created_at']
+        read_only_fields = ['trader', 'status', 'created_at', 'quote']
 
     def validate_availability_date(self, value):
         if value < timezone.now():
             raise serializers.ValidationError("Availability date must be in the future.")
         return value
 
-
+    def create(self, validated_data):
+        trader = self.context['trader']  # from view
+        quote = self.context['quote']
+        return QuoteBid.objects.create(trader=trader, quote=quote, **validated_data)
 
 
 class QuoteBidStatusUpdateSerializer(serializers.ModelSerializer):

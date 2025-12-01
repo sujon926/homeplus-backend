@@ -34,11 +34,8 @@ class QuoteRequestListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]  
     queryset = QuoteRequest.objects.all()
 
-# create bid
 
 
-
-# Worker/Trader: Bid on a job
 class QuoteBidCreateView(generics.CreateAPIView):
     serializer_class = QuoteBidSerializer
     permission_classes = [IsAuthenticated]
@@ -49,9 +46,12 @@ class QuoteBidCreateView(generics.CreateAPIView):
         except QuoteRequest.DoesNotExist:
             return Response({"detail": "Quote not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data,
+            context={'trader': request.user, 'quote': quote}  # rename context
+        )
         serializer.is_valid(raise_exception=True)
-        serializer.save(worker=request.user, quote=quote)
+        serializer.save()
         return Response({"message": "Bid submitted successfully", "bid": serializer.data}, status=status.HTTP_201_CREATED)
 
 
@@ -72,5 +72,5 @@ class WorkerBidListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return QuoteBid.objects.filter(worker=self.request.user)
+        return QuoteBid.objects.filter(trader=self.request.user)
 
