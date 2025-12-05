@@ -23,4 +23,5 @@ urlpatterns = [
      path('api/', include('job.urls')),
      path('api/', include('settings.urls')),
      path('api/', include('documents.urls')),
+    #  path('api/', include('notifications.urls')),
 ]

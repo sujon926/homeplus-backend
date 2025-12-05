@@ -90,7 +90,7 @@ class LoginView(generics.GenericAPIView):
 class SendOTPView(generics.CreateAPIView):
     serializer_class = SendOTPSerializer
     permission_classes = [AllowAny]
-    parser_classes = (MultiPartParser, FormParser)
+    # parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

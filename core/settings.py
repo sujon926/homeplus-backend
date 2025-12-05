@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'job',
     'settings.apps.SettingsConfig',
     'documents',
+    'notifications',
 ]           
 
 STATIC_URL = "/static/"

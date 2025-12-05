@@ -109,7 +109,7 @@ class SendOTPSerializer(serializers.Serializer):
         OTP.objects.create(user=user, code=code)
 
         # 3️⃣ Send OTP via email
-        send_otp_email(user.email, code, name=user.name)
+        send_otp_email(user.email, code, name=user.first_name)
 
         # 4️⃣ Return the user object (not a dict) so the view can access user.email
         return user
