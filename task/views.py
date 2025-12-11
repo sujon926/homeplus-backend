@@ -1,39 +1,50 @@
-from django.shortcuts import render
-from rest_framework import generics, status
-from .serializers import TaskTemplateSerializer,EventSerializer
-from .models import TaskTemplate,Event
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import serializers
+from rest_framework import generics, permissions, filters
+from .models import TaskTemplate, Event
+from .serializers import TaskTemplateSerializer, EventSerializer
 
-
-
-
-# Create your views here.
-class TaskTemplateListView(generics.ListAPIView):
-    serializer_class = TaskTemplateSerializer
+# ---------------- TaskTemplate ----------------
+class TaskTemplateListCreateView(generics.ListCreateAPIView):
     queryset = TaskTemplate.objects.all()
+    serializer_class = TaskTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title']
+    ordering_fields = ['title', 'default_cost']
 
+class TaskTemplateRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TaskTemplate.objects.all()
+    serializer_class = TaskTemplateSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admin can update/delete
 
-class EventCreateView(generics.CreateAPIView):
+# ---------------- Event ----------------
+class EventListCreateView(generics.ListCreateAPIView):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'description']
+    ordering_fields = ['date', 'priority']
 
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except serializers.ValidationError as e:
-            return Response({"errors": e.detail}, status=400)
-        except Exception as e:
-            return Response(
-                {"detail": "Something went wrong", "error": str(e)},
-                status=500
-            )
+    def get_queryset(self):
+        # Users see only their own events
+        return Event.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
-class EventDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+class EventRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Event.objects.filter(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Event deleted successfully."}, 
+            status=status.HTTP_200_OK
+        )
+

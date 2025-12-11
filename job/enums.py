@@ -6,6 +6,8 @@ class ServiceTypeChoices(models.TextChoices):
     ELECTRICAL = 'Electrical', 'Electrical'
     GARDENING = 'Gardening', 'gardening'
     CLEANING = 'Cleaning', 'cleaning'
+    ROOFING = 'Roofing', 'roofing'
+    PAINTING = 'Painting', 'painting'
     OTHERS = 'Others', 'Others'
 
 class PriorityChoices(models.TextChoices):

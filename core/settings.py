@@ -30,7 +30,7 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 # SECRET KEY
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
-    raise ValueError("❌ SECRET_KEY missing in .env file")
+    raise ValueError("SECRET_KEY missing in .env file")
 
 # Allowed Hosts
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "homeplus-backend-9nsg.onrender.com"]
@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'settings.apps.SettingsConfig',
     'documents',
     'notifications',
+    'task',
 ]           
 
 STATIC_URL = "/static/"
